@@ -14,7 +14,7 @@ class Food {
     this.element = document.getElementById('food')!;
   }
 
-  random(min: number, max: number): number {
+  random(min: number, max: number) : number {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
 

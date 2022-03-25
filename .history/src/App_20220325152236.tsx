@@ -14,7 +14,7 @@ class Food {
     this.element = document.getElementById('food')!;
   }
 
-  random(min: number, max: number): number {
+  random(min: number, max: number) : number {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
@@ -30,12 +30,13 @@ class Food {
     let x = this.random(0, 29);
     let y = this.random(0, 29);
     let { rangeX, rangeY, data } = coordinates;
-    data = [...data, `x${this.left / 10}y${this.top / 10}`];
+    data = [...data, `x${this.left / 10}y${this.top / 10}`]
     if (rangeX.includes(x) && rangeY.includes(y) && data.includes(`x${x}y${y}`)) {
       if (rangeX.length === 30 && rangeY.length === 30 && data.length === 900) {
         x = -1;
         y = -1;
       } else {
+        console.log(11111)
         let arr: Array<[number, number]> = [];
         for (let row = 0; row < 30; row++) {
           for (let col = 0; col < 30; col++) {
@@ -87,8 +88,8 @@ class Snake {
     this.head = document.querySelector('.snake-block')!;
     this.body = this.element.getElementsByTagName('div');
 
-    this.head.style.left = '0px';
-    this.head.style.top = '0px';
+    this.head.style.left = '0px'
+    this.head.style.top = '0px'
   }
 
   get left() {
@@ -243,7 +244,7 @@ class Game {
 function App() {
 
   useEffect(() => {
-    new Game();
+    const game = new Game();
   }, []);
 
   return (

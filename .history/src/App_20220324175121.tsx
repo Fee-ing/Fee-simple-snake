@@ -1,20 +1,15 @@
 import { useEffect } from 'react'
 import './App.scss';
 
-type Coordinates = {
-  rangeX: number[],
-  rangeY: number[],
-  data: string[]
-}
-
 class Food {
   element: HTMLElement;
 
   constructor() {
     this.element = document.getElementById('food')!;
+    this.change();
   }
 
-  random(min: number, max: number): number {
+  random(min: number, max: number) : number {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
@@ -26,29 +21,9 @@ class Food {
     return this.element.offsetTop;
   }
 
-  change(coordinates: Coordinates) {
-    let x = this.random(0, 29);
-    let y = this.random(0, 29);
-    let { rangeX, rangeY, data } = coordinates;
-    data = [...data, `x${this.left / 10}y${this.top / 10}`];
-    if (rangeX.includes(x) && rangeY.includes(y) && data.includes(`x${x}y${y}`)) {
-      if (rangeX.length === 30 && rangeY.length === 30 && data.length === 900) {
-        x = -1;
-        y = -1;
-      } else {
-        let arr: Array<[number, number]> = [];
-        for (let row = 0; row < 30; row++) {
-          for (let col = 0; col < 30; col++) {
-            if (!data.includes(`x${row}y${col}`)) arr.push([row, col]);
-          }
-        }
-        const res = arr[this.random(0, arr.length - 1)];
-        x = res[0];
-        y = res[1];
-      }
-    }
-    this.element.style.left = `${x * 10}px`;
-    this.element.style.top = `${y * 10}px`;
+  change() {
+    this.element.style.left = `${this.random(0, 29) * 10}px`;
+    this.element.style.top = `${this.random(0, 29) * 10}px`;
   }
 }
 
@@ -77,7 +52,7 @@ class Info {
 class Snake {
   element: HTMLElement;
   head: HTMLElement;
-  body: HTMLCollectionOf<HTMLElement>;
+  body: HTMLCollection;
   alive: boolean = true;
   isHorizontalReverse: boolean = false;
   isVerticalReverse: boolean = false;
@@ -87,8 +62,8 @@ class Snake {
     this.head = document.querySelector('.snake-block')!;
     this.body = this.element.getElementsByTagName('div');
 
-    this.head.style.left = '0px';
-    this.head.style.top = '0px';
+    this.head.style.left = '0px'
+    this.head.style.top = '0px'
   }
 
   get left() {
@@ -99,29 +74,14 @@ class Snake {
     return this.head.offsetTop;
   }
 
-  get coordinates() {
-    let rangeX: number[] = [];
-    let rangeY: number[] = [];
-    let data: string[] = [];
-    for (let index = 0; index < this.body.length; index++) {
-      const left: number = this.body[index].offsetLeft / 10;
-      const top: number = this.body[index].offsetTop / 10;
-      data.push(`x${left}y${top}`);
-      if (!rangeX.includes(left)) rangeX.push(left);
-      if (!rangeY.includes(top)) rangeY.push(top);
-    }
-    rangeX.sort((a, b) => (a - b));
-    rangeY.sort((a, b) => (a - b));
-    return { rangeX, rangeY, data };
-  }
-
   set left(val) {
     if (this.left === val) return;
-    if (val < 0 || val > 290 || (this.isHorizontalReverse && (val < 20 || val > 270))) {
+    console.log(val)
+    if (val < 0 || val > 290 || (this.isHorizontalReverse && (val < 20 || val > 310))) {
       this.alive = false;
       return;
     }
-    if (this.body[1] && this.body[1].offsetLeft === val) {
+    if (this.body[1] && (this.body[1] as HTMLElement).offsetLeft === val) {
       //水平反向操作
       this.isHorizontalReverse = true;
       val = this.left * 2 - val;
@@ -130,55 +90,33 @@ class Snake {
     }
     this.move();
     this.head.style.left = `${val}px`;
-    this.overlappingCheck();
   }
 
   set top(val) {
     if (this.top === val) return;
-    if (val < 0 || val > 290 || (this.isVerticalReverse && (val < 20 || val > 270))) {
+    if (val < 0 || val > 290) {
       this.alive = false;
       return;
     }
-    if (this.body[1] && this.body[1].offsetTop === val) {
-      //水平反向操作
-      this.isVerticalReverse = true;
-      val = this.top * 2 - val;
-    } else {
-      this.isVerticalReverse = false;
-    }
     this.move();
     this.head.style.top = `${val}px`;
-    this.overlappingCheck();
   }
 
   grow() {
     const div = document.createElement('div');
     div.className = 'snake-block';
     this.element.appendChild(div);
-    if (this.body.length >= 900 - 1) {
-      this.alive = false;
-    }
   }
 
   move() {
     const len = this.body.length;
     for (let index = len - 1; index > 0; index--) {
-      const left = this.body[index - 1].offsetLeft;
-      const top = this.body[index - 1].offsetTop;
-      this.body[index].style.left = `${left}px`;
-      this.body[index].style.top = `${top}px`;
+      const left = (this.body[index - 1] as HTMLElement).offsetLeft;
+      const top = (this.body[index - 1] as HTMLElement).offsetTop;
+      (this.body[index] as HTMLElement).style.left = `${left}px`;
+      (this.body[index] as HTMLElement).style.top = `${top}px`;
     }
   }
-
-  overlappingCheck() {
-    for (let index = 1; index < this.body.length; index++) {
-      if (this.body[index].offsetLeft === this.left && this.body[index].offsetTop === this.top) {
-        this.alive = false;
-        break;
-      }
-    }
-  }
-
 }
 
 class Game {
@@ -197,8 +135,6 @@ class Game {
 
   init() {
     document.addEventListener('keydown', this.keydownHandle.bind(this));
-
-    this.food.change(this.snake.coordinates);
 
     this.run();
   }
@@ -229,9 +165,9 @@ class Game {
         break;
     }
     if (left === this.food.left && top === this.food.top) {
-      this.food.change(this.snake.coordinates);
-      this.snake.grow();
+      this.food.change();
       this.info.scored();
+      this.snake.grow();
     }
     this.snake.left = left;
     this.snake.top = top;
@@ -243,7 +179,7 @@ class Game {
 function App() {
 
   useEffect(() => {
-    new Game();
+    const game = new Game();
   }, []);
 
   return (
@@ -252,7 +188,7 @@ function App() {
         <div className='snake-top'>
           <div className='snake-board'>
             <div id='snake'>
-              <div className='snake-block block1'></div>
+              <div className='snake-block'></div>
             </div>
             <div id='food'></div>
           </div>
